@@ -1,0 +1,9 @@
+.env
+__pycache__/
+node_modules/
+*.pyc
+*.pkl
+*.h5
+.DS_Store
+mark_musk/
+mark_env/
