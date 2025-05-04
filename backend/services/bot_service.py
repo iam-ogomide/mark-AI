@@ -23,8 +23,8 @@ from PyPDF2 import PdfReader
 import io
 
 # Set custom temp directory
-tempfile.tempdir = "C:\\Users\\User\\Desktop\\Mark Musk\\temp"
-
+temp_dir = "C:\\Users\\mide\\Documents\\MarkMusk\\temp"
+os.makedirs(temp_dir, exist_ok=True) 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -193,7 +193,7 @@ Answer:"""
             logger.error(f"Failed to index sample documents: {e}")
             raise
 
-    def _upload_documents_in_batches(self, documents: List[Document], batch_size: int = 10) -> None:
+    def _upload_documents_in_batches(self, documents: List[Document], batch_size: int = 50) -> None:
         """Upload documents to Pinecone in batches with size estimation."""
         for doc in documents:
             content_size = len(doc.page_content.encode('utf-8')) / 1024
@@ -268,7 +268,7 @@ Answer:"""
                 logger.warning(f"No Markdown files found in {repo_url}/docs")
                 return
             
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
             split_docs = text_splitter.split_documents(docs)
             logger.info(f"Split {len(docs)} documents into {len(split_docs)} chunks")
             

@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Musk - CreditChek API Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3a86ff;
+            --primary-dark: #2667cc;
+            --secondary-color: #5e60ce;
+            --accent-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #06d6a0;
+            --warning-color: #ef476f;
+            --text-color: #2b2d42;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+            --card-bg: #ffffff;
+            --sidebar-bg: #f0f4f8;
+            --main-bg: #f9fafb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--main-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .app-header {
+            background: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.25rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .app-logo i {
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .app-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .app-header p {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            margin-left: auto;
+            font-weight: 500;
+        }
+
+        .app-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            background-color: var(--sidebar-bg);
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 5;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-heading {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 1rem 0 0.75rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #4b5563;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.25);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background-color: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        .file-upload {
+            position: relative;
+            width: 100%;
+            height: 6rem;
+            margin-bottom: 1rem;
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(58, 134, 255, 0.05);
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload i {
+            font-size: 1.5rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload p {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .file-preview {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            max-height: 150px;
+            overflow-y: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .file-preview.has-file {
+            border-left: 3px solid var(--success-color);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        .welcome-message {
+            padding: 2rem;
+            background-color: white;
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #e2e8f0;
+        }
+
+        .welcome-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .welcome-title i {
+            font-size: 1.75rem;
+        }
+
+        .welcome-description {
+            color: #4b5563;
+            margin-bottom: 1.25rem;
+            font-size: 1rem;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-item {
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .feature-item i {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-top: 0.25rem;
+        }
+
+        .feature-item p {
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background-color: #f8fafc;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+            max-width: 85%;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            margin-left: auto;
+        }
+
+        .assistant-message {
+            margin-right: auto;
+        }
+
+        .message-bubble {
+            padding: 1rem 1.25rem;
+            border-radius: 18px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-message .message-bubble {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .assistant-message .message-bubble {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .user-message .message-header {
+            justify-content: flex-end;
+            color: #64748b;
+        }
+
+        .assistant-message .message-header {
+            color: #64748b;
+        }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .assistant-message .message-avatar {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .user-message .message-header .message-time {
+            margin-right: 0.5rem;
+        }
+
+        .assistant-message .message-header .message-time {
+            margin-left: 0.5rem;
+        }
+
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 0.75rem 0;
+            overflow-x: auto;
+        }
+
+        .chat-input-container {
+            padding: 1rem 1.5rem;
+            background-color: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .chat-input-wrapper {
+            flex: 1;
+            position: relative;
+            background-color: #f1f5f9;
+            border-radius: 24px;
+            padding: 0.25rem;
+            transition: var(--transition);
+        }
+
+        .chat-input-wrapper:focus-within {
+            background-color: white;
+            box-shadow: 0 0 0 2px rgba(58, 134, 255, 0.3);
+        }
+
+        #user-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            outline: none;
+            color: var(--text-color);
+        }
+
+        #send-button {
+            width: 42px;
+            height: 42px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #send-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toggle sidebar button for responsive design */
+        .toggle-sidebar {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+
+        /* Responsive design */
+        @media (max-width: 992px) {
+            .toggle-sidebar {
+                display: block;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -350px;
+                top: 0;
+                height: 100%;
+                padding-top: 4rem;
+                z-index: 1;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 0;
+            }
+            
+            .overlay.active {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-header p {
+                display: none;
+            }
+            
+            .feature-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: 1rem;
+            opacity: 0.85;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            opacity: 1;
+            transform: rotate(30deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <button class="toggle-sidebar" id="toggle-sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="app-logo">
+                <i class="fas fa-robot"></i>
+                <h1>Mark Musk</h1>
+            </div>
+            <p>CreditChek API Assistant</p>
+            <button class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <div class="app-layout">
+            <div class="overlay" id="overlay"></div>
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-heading"><i class="fas fa-book"></i> Documentation Sources</h3>
+                    
+                    <div class="github-section">
+                        <h4 class="sidebar-section-title"><i class="fab fa-github"></i> GitHub Repository</h4>
+                        
+                        <div class="input-group">
+                            <label class="input-label" for="github-repo">Repository URL</label>
+                            <input type="text" id="github-repo" class="text-input" 
+                                   value="https://github.com/ORIBData/docusaurus-.git">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label" for="github-branch">Branch</label>
+                            <input type="text" id="github-branch" class="text-input" value="master">
+                        </div>
+                        
+                        <button id="process-github" class="btn btn-full">
+                            <i class="fas fa-code-branch"></i> Process Repository
+                        </button>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="upload-section">
+                        <h4 class="sidebar-section-title"><i class="fas fa-file-upload"></i> Document Upload</h4>
+                        
+                        <div class="file-upload">
+                            <input type="file" id="document-upload" accept=".pdf,.txt">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop files or click to browse</p>
+                        </div>
+                        
+                        <button id="process-doc" class="btn btn-full" disabled>
+                            <i class="fas fa-upload"></i> Process Document
+                        </button>
+                        
+                        <div id="file-preview" class="file-preview" style="display: none;"></div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="main-content">
+                <div class="chat-container">
+                    <div class="welcome-message">
+                        <h2 class="welcome-title"><i class="fas fa-comment-dots"></i> Welcome to Mark Musk</h2>
+                        <p class="welcome-description">Your AI assistant for CreditChek API integration. I'm here to help you understand and implement the API efficiently.</p>
+                        
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <i class="fas fa-code"></i>
+                                <p>Get sample code in Python, NodeJS, PHP Laravel, or GoLang</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-server"></i>
+                                <p>Learn about API endpoints and their usage</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <p>Best practices for secure integration</p>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Error handling and troubleshooting assistance</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="chat-messages" class="chat-messages">
+                        <!-- Messages will be inserted here by JavaScript -->
+                    </div>
+
+                    <div class="chat-input-container">
+                        <div class="chat-input-wrapper">
+                            <input type="text" id="user-input" placeholder="Ask me about CreditChek API..." autocomplete="off">
+                        </div>
+                        <button id="send-button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar for mobile view
+        document.getElementById('toggle-sidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        });
+        
+        // File upload preview
+        document.getElementById('document-upload').addEventListener('change', function(e) {
+            const fileInput = e.target;
+            const filePreview = document.getElementById('file-preview');
+            const processBtn = document.getElementById('process-doc');
+            
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                filePreview.innerHTML = `<strong>Selected file:</strong> ${fileName}`;
+                filePreview.classList.add('has-file');
+                filePreview.style.display = 'block';
+                processBtn.disabled = false;
+            } else {
+                filePreview.style.display = 'none';
+                processBtn.disabled = true;
+            }
+        });
+        
+        // Dark mode toggle (placeholder - would need more implementation)
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (icon.classList.contains('fa-moon')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                // Would implement dark mode styles here
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                // Would implement light mode styles here
+            }
+        });
+        
+        // We've removed the demo chat functionality as it was conflicting with app.js
+        // The original app.js file will handle all chat interactions
+        // This prevents the "Thank you for your question about the CreditChek API" message from appearing
+    </script>
+    
+    <!-- Original app.js reference -->
+    <script src="js/app.js"></script>
+</body>
+</html>
