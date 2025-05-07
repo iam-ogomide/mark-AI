@@ -98,34 +98,70 @@ document.addEventListener('DOMContentLoaded', function() {
         
         messageDiv.appendChild(metaDiv);
         
-        if (content && typeof content === 'object') {
+        if (typeof content === 'string') {
+            // Process markdown-like formatting
+            const processedContent = renderMarkdownLikeText(content);
+            messageDiv.innerHTML += processedContent;
+        } else if (content && typeof content === 'object') {
             if (content.response && content.response.text) {
-                const textDiv = document.createElement('div');
-                textDiv.textContent = content.response.text;
-                messageDiv.appendChild(textDiv);
+                const processedContent = renderMarkdownLikeText(content.response.text);
+                messageDiv.innerHTML += processedContent;
                 
                 if (content.response.code_snippets) {
                     for (const [lang, snippet] of Object.entries(content.response.code_snippets)) {
                         const codeDiv = document.createElement('pre');
                         codeDiv.className = 'code-block';
-                        codeDiv.textContent = snippet;
+                        const langSpan = document.createElement('span');
+                        langSpan.className = 'code-language';
+                        langSpan.textContent = lang;
+                        codeDiv.appendChild(langSpan);
+                        codeDiv.appendChild(document.createTextNode('\n' + snippet));
                         messageDiv.appendChild(codeDiv);
                     }
                 }
             }
             else if (content.text) {
-                const textDiv = document.createElement('div');
-                textDiv.textContent = content.text;
-                messageDiv.appendChild(textDiv);
+                const processedContent = renderMarkdownLikeText(content.text);
+                messageDiv.innerHTML += processedContent;
             }
-        } else {
-            const textDiv = document.createElement('div');
-            textDiv.textContent = content;
-            messageDiv.appendChild(textDiv);
         }
         
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function renderMarkdownLikeText(text) {
+        if (!text) return '';
+        
+        // Convert markdown-like formatting to HTML
+        let html = text
+            // Convert **bold** to <strong>
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            // Convert *italic* to <em>
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            // Convert `code` to <code>
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            // Convert bullet points to list items
+            .replace(/^-\s(.*)$/gm, '<li>$1</li>')
+            // Convert numbered lists
+            .replace(/^\d+\.\s(.*)$/gm, '<li>$1</li>')
+            // Convert line breaks to <br>
+            .replace(/\n/g, '<br>');
+        
+        // Wrap lists in <ul> tags
+        html = html.replace(/(<li>.*<\/li>)+/g, '<ul>$&</ul>');
+        
+        // Convert ```code blocks``` to <pre><code>
+        html = html.replace(/```([^`]+)```/g, '<pre class="code-block"><code>$1</code></pre>');
+        
+        // Convert headings (##) to <h3>
+        html = html.replace(/^##\s(.*)$/gm, '<h3>$1</h3>');
+        
+        // Convert paragraphs (double newlines)
+        html = html.replace(/(<br>\s*){2,}/g, '</p><p>');
+        html = '<p>' + html + '</p>';
+        
+        return html;
     }
 
     async function sendMessage() {
@@ -156,11 +192,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             const data = await response.json();
-            const displayContent = data.response?.text ? data.response.text : data.response;
-            addMessageToChat('assistant', displayContent || data, new Date().toLocaleString());
+            addMessageToChat('assistant', data, new Date().toLocaleString());
         } catch (error) {
             console.error('Error sending message:', error);
-            addMessageToChat('assistant', 'Sorry, I encountered an error processing your request.', new Date().toLocaleString());
+            addMessageToChat('assistant', {
+                text: 'Sorry, I encountered an error processing your request. Please try again.'
+            }, new Date().toLocaleString());
         } finally {
             sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
             sendButton.disabled = false;
@@ -255,6 +292,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             processDocBtn.innerHTML = '<i class="fas fa-upload"></i> Process Document';
             processDocBtn.disabled = false;
+            documentUpload.value = '';
+            filePreview.innerHTML = '';
         }
     }
 });
